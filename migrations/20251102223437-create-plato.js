@@ -28,7 +28,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'Categorias', // Nombre de la tabla (en plural)
+          model: 'categoria', // Nombre de la tabla (en plural)
           key: 'id',
         },
         onUpdate: 'CASCADE',
