@@ -1,19 +1,51 @@
-// routes/reserva.routes.js
+const { authJwt } = require('../middleware');
+const reservaController = require('../controllers/reserva.controller.js');
+const router = require('express').Router();
 
-// (Dev) ¡Esto es lo que arregla el TypeError!
-// Estamos exportando una función que 'server.js' puede ejecutar.
+// --- RUTA PÚBLICA (Para Clientes) ---
+// (RF-08) Ruta para CREAR una nueva reserva
+// POST -> /api/reservas
+router.post(
+    '/',
+    // (QA) ¡SIN GUARDIA! Esta ruta es pública.
+    reservaController.create 
+);
+
+
+// --- RUTAS PROTEGIDAS (Para Admin CMS) ---
+
+// (RF-15) Ruta para LEER TODAS las reservas (con filtros)
+router.get(
+    '/',
+    [authJwt.verifyToken], // ¡Protegido!
+    reservaController.findAll
+);
+
+// (RF-15) Ruta para LEER UNA reserva
+router.get(
+    '/:id',
+    [authJwt.verifyToken], // ¡Protegido!
+    reservaController.findOne
+);
+
+// (RF-15) Ruta para ACTUALIZAR UNA reserva
+
+router.put(
+    '/:id',
+    [authJwt.verifyToken], // ¡Protegido!
+    reservaController.update
+);
+
+// (RF-15) Ruta para ELIMINAR UNA reserva
+
+router.delete(
+    '/:id',
+    [authJwt.verifyToken], // ¡Protegido!
+    reservaController.delete
+);
+
+
+// (Dev) Conectamos el router a la app
 module.exports = app => {
-    const reservaController = require('../controllers/reserva.controller.js');
-    const router = require('express').Router();
-
-    // Ruta para CREAR una nueva reserva (RF-08)
-    // POST -> /api/reservas
-    router.post('/', reservaController.createReserva);
-
-    // --- (PM) Aquí irán las rutas del Admin CMS (RF-15) ---
-    // GET -> /api/reservas (Para ver todas)
-    // router.get('/', reservaController.findAllReservas); 
-
-    // URL base
     app.use('/api/reservas', router);
 };

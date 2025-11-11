@@ -3,7 +3,6 @@ const Usuario = db.Usuario;
 const bcrypt = require('bcryptjs'); // Importamos bcrypt para hashear
 const jwt = require('jsonwebtoken'); // Importamos JWT para los tokens
 
-// Importamos la clave secreta desde tu archivo .env
 require('dotenv').config();
 const AUTH_SECRET = process.env.AUTH_SECRET;
 

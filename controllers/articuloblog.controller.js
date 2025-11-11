@@ -1,11 +1,8 @@
-// controllers/articuloblog.controller.js
-
 const db = require('../models');
-// Asumimos que el modelName en 'articuloblog.js' es 'ArticuloBlog'
 const ArticuloBlog = db.ArticuloBlog; 
 
 /**
- * 1. OBTENER TODOS los artículos (para la página de Relatos)
+ * 1. OBTENER TODOS los artículos (PÚBLICO)
  * Ruta: GET /api/relatos
  */
 exports.findAllRelatos = async (req, res) => {
@@ -16,7 +13,7 @@ exports.findAllRelatos = async (req, res) => {
                 'slug', 
                 'titulo', 
                 'categoria', 
-                'imagenDestacada', // <-- ¡LA CORRECCIÓN! (en lugar de 'imagen')
+                'imagenDestacada', 
                 'descripcion', 
                 'autor'
             ]
@@ -32,37 +29,118 @@ exports.findAllRelatos = async (req, res) => {
 };
 
 /**
- * 2. OBTENER UN artículo por su SLUG (para el detalle)
+ * 2. OBTENER UN artículo por su SLUG (PÚBLICO)
  * Ruta: GET /api/relatos/:slug
  */
 exports.findOneBySlug = async (req, res) => {
     
-    // (Frontend) ¡La clave! Lo buscamos por el 'slug' de la URL,
-    // no por el 'id'. Esto es lo que 'StoryDetailPage.jsx' espera.
     const slug = req.params.slug;
 
     try {
-        // (Dev) Usamos 'findOne' (Encontrar Uno) donde la
-        // columna 'slug' coincida con el slug de la URL.
+        // (Frontend) Esto es para la página de detalle
         const articulo = await ArticuloBlog.findOne({
             where: { slug: slug }
         });
 
         if (articulo) {
-            // (Frontend) ¡Éxito! Lo encontramos.
             res.status(200).json(articulo);
         } else {
-            // (Frontend) 404 si el slug no existe.
             res.status(404).json({
                 message: `No se pudo encontrar el artículo con slug=${slug}.`
             });
         }
 
     } catch (error) {
-        // (Dev) Error genérico si la base de datos falla
         console.error(`Error al buscar artículo con slug=${slug}:`, error.message);
         res.status(500).json({
             message: "Error interno al buscar el artículo."
         });
+    }
+};
+
+/**
+ * 3. CREAR un nuevo Relato (Protegido por Admin)
+ * Ruta: POST /api/relatos
+ */
+exports.create = async (req, res) => {
+    const { 
+        titulo, 
+        slug, 
+        autor, 
+        categoria, 
+        fecha, 
+        imagenDestacada, 
+        descripcion, 
+        contenido 
+    } = req.body;
+
+    // (QA) Validación de campos mínimos
+    if (!titulo || !slug || !contenido) {
+        return res.status(400).json({
+            message: "Error: Título, Slug y Contenido son obligatorios."
+        });
+    }
+
+    try {
+        const nuevoArticulo = await ArticuloBlog.create(req.body);
+        res.status(201).json(nuevoArticulo);
+
+    } catch (error) {
+        // (Dev) Manejo de error si el 'slug' ya existe
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            return res.status(409).json({ // 409 = Conflicto
+                message: "Error: El 'slug' (URL) ya existe. Prueba con uno diferente."
+            });
+        }
+        console.error("Error al crear el relato:", error.message);
+        res.status(500).json({ message: "Error interno al crear el relato." });
+    }
+};
+
+/**
+ * 4. ACTUALIZAR un Relato por SLUG (Protegido por Admin)
+ * Ruta: PUT /api/relatos/:slug
+ */
+exports.update = async (req, res) => {
+    const slug = req.params.slug;
+
+    try {
+        // (Dev) Actualizamos el artículo buscando por 'slug'
+        const [numFilasAfectadas] = await ArticuloBlog.update(
+            req.body, 
+            { where: { slug: slug } } 
+        );
+
+        if (numFilasAfectadas === 1) {
+            res.status(200).json({ message: "Relato actualizado con éxito." });
+        } else {
+            res.status(404).json({ message: `No se pudo actualizar el relato con slug=${slug}. (No encontrado)` });
+        }
+    } catch (error) {
+        console.error("Error al actualizar el relato:", error.message);
+        res.status(500).json({ message: "Error interno al actualizar el relato." });
+    }
+};
+
+/**
+ * 5. ELIMINAR un Relato por SLUG (Protegido por Admin)
+ * Ruta: DELETE /api/relatos/:slug
+ */
+exports.delete = async (req, res) => {
+    const slug = req.params.slug;
+
+    try {
+        const numFilasAfectadas = await ArticuloBlog.destroy({
+            where: { slug: slug }
+        });
+
+        if (numFilasAfectadas === 1) {
+            res.status(200).json({ message: "Relato eliminado con éxito." });
+        } else {
+            res.status(404).json({ message: `No se pudo eliminar el relato con slug=${slug}. (No encontrado)` });
+        }
+    } catch (error) {
+        console.error("Error al eliminar el relato:", error.message);
+        res.status(500).json({ message: "Error interno al eliminar el relato." });
     }
 };

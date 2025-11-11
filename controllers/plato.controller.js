@@ -1,9 +1,7 @@
-// controllers/plato.controller.js
 
-// (DEV) Importamos la base de datos y los modelos que necesitamos.
 const db = require('../models');
 const Plato = db.Plato;
-const Categoria = db.Categoria; // Lo dejamos aquí listo para cuando lo usemos.
+const Categoria = db.Categoria;
 
 /**
  * 1. OBTENER TODOS los platillos (para la página de Menú)
@@ -63,6 +61,11 @@ exports.findOnePlato = async (req, res) => {
         });
     }
 };
+
+/**
+ * 3. CREAR un nuevo platillo (Ruta Protegida)
+ * Ruta: POST /api/platillos
+ */
 exports.createPlato = async (req, res) => {
     
     // (Dev) Recibimos todos los datos del formulario del Admin
@@ -106,5 +109,55 @@ exports.createPlato = async (req, res) => {
         res.status(500).json({
             message: "Error interno al crear el platillo."
         });
+    }
+};
+
+// --- (DEV) ¡NUEVA FUNCIÓN AÑADIDA! ---
+/**
+ * 4. ACTUALIZAR un platillo por ID (Ruta Protegida)
+ * Ruta: PUT /api/platillos/:id
+ */
+exports.updatePlato = async (req, res) => {
+    const id = req.params.id;
+
+    try {
+        // (Dev) 'update' devuelve un array, el primer valor [0] es el número de filas afectadas.
+        const [numFilasAfectadas] = await Plato.update(
+            req.body, // (Dev) Toma todos los campos del formulario y los actualiza
+            { where: { id: id } } // Qué fila actualizar
+        );
+
+        if (numFilasAfectadas === 1) {
+            res.status(200).json({ message: "Platillo actualizado con éxito." });
+        } else {
+            res.status(404).json({ message: `No se pudo actualizar el platillo con id=${id}. (No encontrado)` });
+        }
+    } catch (error) {
+        console.error("Error al actualizar el platillo:", error.message);
+        res.status(500).json({ message: "Error interno al actualizar el platillo." });
+    }
+};
+
+// --- (DEV) ¡NUEVA FUNCIÓN AÑADIDA! ---
+/**
+ * 5. ELIMINAR un platillo por ID (Ruta Protegida)
+ * Ruta: DELETE /api/platillos/:id
+ */
+exports.deletePlato = async (req, res) => {
+    const id = req.params.id;
+
+    try {
+        const numFilasAfectadas = await Plato.destroy({
+            where: { id: id }
+        });
+
+        if (numFilasAfectadas === 1) {
+            res.status(200).json({ message: "Platillo eliminado con éxito." });
+        } else {
+            res.status(404).json({ message: `No se pudo eliminar el platillo con id=${id}. (No encontrado)` });
+        }
+    } catch (error) {
+        console.error("Error al eliminar el platillo:", error.message);
+        res.status(500).json({ message: "Error interno al eliminar el platillo." });
     }
 };

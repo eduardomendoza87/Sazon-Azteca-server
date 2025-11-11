@@ -14,25 +14,22 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Plato.init({
-    // (DEV) Renombrado para que coincida con el frontend (de la migración 2)
     titulo: DataTypes.STRING,
     descripcion: DataTypes.TEXT,
     precio: DataTypes.DECIMAL,
     imagenUrl: DataTypes.STRING,
     historia: DataTypes.TEXT,
     
-    // (DEV) Añadidos de la migración 2
+    
     ingredientes: DataTypes.TEXT,
     procedencia: DataTypes.TEXT,
 
-    // (DEV) ¡LA CORRECCIÓN QUE FALTABA!
-    // El modelo DEBE saber sobre la columna de la llave foránea
-    // que definimos en la migración 'create-plato'.
+    
     categoriaId: {
       type: DataTypes.INTEGER,
-      allowNull: false, // O 'true' si lo permitiste en la migración
+      allowNull: false, 
       references: {
-        model: 'categoria', // Debe coincidir EXACTAMENTE con el nombre de la tabla
+        model: 'categoria',
         key: 'id'
       }
     }
@@ -40,7 +37,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Plato',
-    tableName: 'Platos' // Es buena práctica definirlo explícitamente
+    tableName: 'Platos' 
   });
   return Plato;
 };

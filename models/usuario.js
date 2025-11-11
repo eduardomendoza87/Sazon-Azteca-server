@@ -23,12 +23,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false 
     }
-    // (PM) Podríamos añadir 'nombre', 'rol', etc. pero
-    // para el login, email y password es lo único necesario.
   }, {
     sequelize,
     modelName: 'Usuario',
-    tableName: 'Usuarios' // Asegurémonos de que la tabla sea 'Usuarios' (plural)
+    tableName: 'Usuarios' 
   });
   return Usuario;
 };

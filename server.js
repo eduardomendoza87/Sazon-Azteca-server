@@ -40,6 +40,7 @@ require("./routes/plato.routes")(app); // Rutas para manejar "platillos"
 require("./routes/reserva.routes")(app); // Rutas para manejar "reservas"
 require("./routes/articuloblog.routes.js")(app); // Rutas para manejar "relatos"
 require("./routes/auth.routes")(app); // Rutas para manejar "autenticación" (registro/login)
+require("./routes/categoria.routes.js")(app); // Rutas para CRUD de Categorías
 
 // --- 5. SINCRONIZACIÓN Y ARRANQUE ---
 // Aquí le decimos a Sequelize que "mire" nuestros modelos y, si es necesario,

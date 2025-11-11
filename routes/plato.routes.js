@@ -1,25 +1,40 @@
-// routes/plato.routes.js
+// (Dev) Importamos el middleware "guardia"
+const { authJwt } = require('../middleware');
+const platosController = require('../controllers/plato.controller.js');
+const router = require('express').Router();
 
-// (Dev) Este archivo solo define las URLs, no la lógica.
-module.exports = app => {
-    const { authJwt } = require('../middleware');
-    const platosController = require('../controllers/plato.controller.js');
-    const router = require('express').Router();
+// --- RUTAS PÚBLICAS (Para Clientes) ---
+// (RF-03)
+router.get('/', platosController.findAllPlatos);
+// (RF-05)
+router.get('/:id', platosController.findOnePlato);
 
-    // (Frontend) Cuando llegue una petición GET a '/',
-    // ejecuta la función 'findAllPlatos' del controlador.
-    router.get('/', platosController.findAllPlatos);
 
-    // --- (DEV) NUEVA RUTA PARA EL DETALLE DEL PLATO (RF-05) ---
-    router.get('/:id', platosController.findOnePlato);
+// --- RUTAS PROTEGIDAS (Para Admin CMS) ---
 
+// (RF-12 Create)
 router.post(
     '/',
-     [authJwt.verifyToken],
-     platosController.createPlato
+    [authJwt.verifyToken], // ¡Protegido!
+    platosController.createPlato
 );
-    // (Dev) Esta es la URL base para todas las rutas en este archivo.
-    // (Frontend) Así, tu React llamará a:
-    // http://localhost:8080/api/platillos
+
+// (RF-12 Update) 
+router.put(
+    '/:id',
+    [authJwt.verifyToken], // ¡Protegido!
+    platosController.updatePlato
+);
+
+// (RF-12 Delete) 
+router.delete(
+    '/:id',
+    [authJwt.verifyToken], // ¡Protegido!
+    platosController.deletePlato
+);
+
+
+// (Dev) Conectamos el router a la app
+module.exports = app => {
     app.use('/api/platillos', router);
 };
